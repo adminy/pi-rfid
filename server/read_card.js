@@ -33,26 +33,17 @@ module.exports = (callback, workToDo) => {
         if (!mfrc522.authenticate(8, [0xff, 0xff, 0xff, 0xff, 0xff, 0xff], uid)) return
 
         if(workToDo.hasWork) {
-            const data = Array.from(workToDo.data)            
-            mfrc522.getDataForBlock(8)
-
-            mfrc522.writeDataToBlock(8, data)
-            mfrc522.getDataForBlock(8)
-            
-            mfrc522.writeDataToBlock(8, data)
-            
-            mfrc522.getDataForBlock(8)
-
-            workToDo.callback()
             workToDo.hasWork = false
-            return
+            const data = Array.from(workToDo.data)
+            mfrc522.writeDataToBlock(8, data)
+            return workToDo.callback()
         }
-        const codeData = mfrc522.getDataForBlock(8)
-        const code = decoder.decode(new Uint8Array(codeData))
+        const code = decoder.decode(new Uint8Array(mfrc522.getDataForBlock(8)))
 
         mfrc522.stopCrypto()
     
         return callback({ status: 1, code })
+
             // console.log("Card detected, CardType: " + response.bitSize);
     
         //# Get the UID of the card
